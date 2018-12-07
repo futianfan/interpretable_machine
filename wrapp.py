@@ -1,8 +1,10 @@
 from time import time
 
+## https://www.zhihu.com/question/26930016
 
-
+############	1. simple decorator  #########
 def decorator1(func):
+	print('flag0====')
 	def wrapper1():
 		t1 = time()
 		func()
@@ -15,14 +17,14 @@ def f1():
 	print('test inside f1')
 
 
-
+############	2. "class" decorator  #########
 class decorator2:
 	def __init__(self, func):
 		self._func = func 
-		print('flag1************')
+		print('decorator2 definition************')
 
 	def __call__(self):
-		print('flag2')
+		print('decorator2 calling')
 		t1 = time()
 		self._func()
 		t2 = time()
@@ -33,10 +35,80 @@ def f2():
 	print('test inside %s' % 'f2')
 
 
+############	3. decorator with (parameter in function)  #########
+def decorator3(func):
+	print('decorator3 definition=====')
+	def wrapper1(*args, **kwargs):
+		print('decorator3 calling====')
+		return func(*args, **kwargs)
+	return wrapper1
+
+#### formulation I
+@decorator3
+def f3(batchsize, batch_first = True, datatype = 'str'):
+	assert batch_first == True
+	print(datatype)
+	return batchsize
+
+'''
+#### formulation II
+def f3(batchsize, batch_first = True, datatype = 'str'):
+	assert batch_first == True
+	print(datatype)
+	return batchsize
+f3 = decorator3(f3)
+'''
+
+### formulation I and formulation II are equivalent 
+
+############	4. parameter in decorator  #########
+### e.g., https://github.com/SwordYork/DCNMT/blob/old-version/model.py
+
+
+def decorator4(level):
+	print('decorator4---- 1. %s ' % level)
+	def f2(func):
+		print('decorator4---- 2. %s %s' % (level, func.__name__))
+		def f3(*args, **kwargs):
+			print('%s begin ' % func.__name__)
+			print('decorator4---- 3. %s %s' % (level, func.__name__))
+			a = func(level, *args, **kwargs)
+			print('%s end' % func.__name__)
+			return a 
+		return f3
+	return f2
+
+
+@decorator4(level = 'INFO')
+def f4(lev, a = 1, b = 2):
+	##  print('inside function:::: %s' % level)  ### WRONG
+	print(lev)
+	return a + b 
+
+
+print('======================test f5======================')
+
+@decorator3
+@decorator4(level = 'INFO')
+def f5(lev, a = 4, b = 3):
+	print('f5 %s' % lev)
+	return a ** b 
+
+
+
+		
+
+
 
 
 if __name__ == '__main__':
-	f1()
+	#f1()
 	#f2()
+	#assert f3(batchsize = 16, batch_first = True) == 16
+	#print('======================test f4======================')
+	#assert f4(3,2) == 5
+	print('======================test f5======================')
+	print(f5(2,5))
+	pass
 
 
