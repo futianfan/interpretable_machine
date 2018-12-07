@@ -50,16 +50,16 @@ def f3(batchsize, batch_first = True, datatype = 'str'):
 	print(datatype)
 	return batchsize
 
-'''
+
 #### formulation II
 def f3(batchsize, batch_first = True, datatype = 'str'):
 	assert batch_first == True
 	print(datatype)
 	return batchsize
 f3 = decorator3(f3)
-'''
 
-### formulation I and formulation II are equivalent 
+
+###!!!! formulation I and formulation II are equivalent 
 
 ############	4. parameter in decorator  #########
 ### e.g., https://github.com/SwordYork/DCNMT/blob/old-version/model.py
@@ -77,13 +77,25 @@ def decorator4(level):
 			return a 
 		return f3
 	return f2
-
-
+'''
+### formulation I
 @decorator4(level = 'INFO')
 def f4(lev, a = 1, b = 2):
 	##  print('inside function:::: %s' % level)  ### WRONG
 	print(lev)
 	return a + b 
+'''
+### formulation II 
+def f4(lev, a = 1, b = 2):
+	##  print('inside function:::: %s' % level)  ### WRONG
+	print(lev)
+	return a + b 
+### II.1
+#f4 = decorator4(level = 'INFO')(f4)
+### II.2
+tmp = decorator4(level = 'INFO')
+f4 = tmp(f4)
+###!!!! formulation I and formulation II are equivalent 
 
 
 print('======================test f5======================')
@@ -96,7 +108,39 @@ def f5(lev, a = 4, b = 3):
 
 
 
-		
+print('======================test f6======================')
+
+## how to use wrapper 
+## https://github.com/mila-udem/blocks/blob/master/blocks/bricks/base.py
+## line 915 
+## blocks/blocks/bricks/recurrent/base.py 
+## https://github.com/mila-udem/blocks/blob/master/blocks/bricks/recurrent/base.py
+## line-63:  def recurrent(*args, **kwargs): 
+
+
+def application(*args, **kwargs):
+	assert not args and kwargs
+	kwa = kwargs
+	def wrap_application(Application_class):
+		def f3(*args, **kwargs):
+			app = Application_class(*args, **kwargs)
+			for key, value in kwa.items():
+				setattr(app, key, value)
+				print('{}  {}'.format(key, value))
+			return app 
+		return f3
+	return wrap_application
+
+@application(attr3 = 3)
+class Application:
+	def __init__(self, attr1, attr2 = 2):
+		self._attr1 = attr1
+		self._attr2 = attr2
+
+	def print_info(self):
+		print('attribute 1 is {}'.format(self._attr1))
+
+
 
 
 
@@ -106,9 +150,12 @@ if __name__ == '__main__':
 	#f2()
 	#assert f3(batchsize = 16, batch_first = True) == 16
 	#print('======================test f4======================')
-	#assert f4(3,2) == 5
-	print('======================test f5======================')
-	print(f5(2,5))
+	assert f4(3,2) == 5
+	#print('======================test f5======================')
+	#print(f5(2,5))
+	app = Application(1)
+	assert hasattr(app, 'attr3')
+
 	pass
 
 
