@@ -49,13 +49,47 @@
 
 
 
-8. zip
+8. zip: zipp.py
 	e.g., 
 		dict(zip(words, counts))
 		zip(words, range(len(words)))
+		zip(*lst)
+
+===========understand *some_list and **some_dict (key must be string)
 
 
 
+#### TO DO ####
+__future__   absolute_import, division, print_function, import unicode_literals
+
+collections
+	Counter, namedtuple, Sequence, OrderedDict, MutableMapping, defaultdict, deque
+
+
+import re
+
+
+__all__.    __dict__.    __call__.   __init__.py. 
+
+dict: dict.values(), dict.keys(). dict.update().   dict.items(),  sorted(dict.items(), key = lambda x:(-x[1], x[0])). iteritems(). dict.get(2, defaultvalue), setdefault;     dict.pop(key_value)
+
+
+iter().   next(iter(lst)) 
+
+
+from pydoc import locate
+import funcsigs
+import inspect   
+import requests
+import shutil
+import subprocess    
+import tempfile
+import unicodedata
+import warnings
+
+
+import os:  os.path.join; os.path.abspath; os.path.exists(some_path); os.system(‘执行shell命令’);  os.path.isdir(some_path);  os.makedirs;  os.stat;  os.remove(some_path);  
+  grep " os\." */*/*.py | grep -v join | awk -F ":" '{print $2}' | grep os  
 
 
 
