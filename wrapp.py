@@ -77,21 +77,21 @@ def decorator4(level):
 			return a 
 		return f3
 	return f2
-'''
+
 ### formulation I
 @decorator4(level = 'INFO')
 def f4(lev, a = 1, b = 2):
 	##  print('inside function:::: %s' % level)  ### WRONG
 	print(lev)
 	return a + b 
-'''
+
 ### formulation II 
 def f4(lev, a = 1, b = 2):
 	##  print('inside function:::: %s' % level)  ### WRONG
 	print(lev)
 	return a + b 
 ### II.1
-#f4 = decorator4(level = 'INFO')(f4)
+f4 = decorator4(level = 'INFO')(f4)
 ### II.2
 tmp = decorator4(level = 'INFO')
 f4 = tmp(f4)
