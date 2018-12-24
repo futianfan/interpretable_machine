@@ -11,6 +11,10 @@ tf.set_random_seed(3)
 4. tf.constant & tf.Variable 
 5. random_normal & random_uniform & random_shuffle 
 6. tf.argmax  argmin 
+7. index gather? 
+8. tf.maximum & minimum;  greater & less & equal
+9. tf.add/div  log/exp
+10. concat
 ### list of list; numpy.array can be used as input for TF 
 """
 
@@ -97,8 +101,8 @@ for i in tf.trainable_variables():
 
 
 
-#### 6. tf.argmax  argmin
-
+#### 6. tf.argmax & argmin
+'''
 #A = [[1,3,4,5,6]]
 #B = [[1,3,4], [2,4,1]]
 #A = tf.constant( [[1,3,4,5,6]] )
@@ -113,21 +117,69 @@ with tf.Session() as sess:
 	#print(sess.run(tf.argmax(A, 1)))
 	#print(sess.run(tf.argmax(B, 1)))
 	print(sess.run([A, VA, C]))		### note that A and VA has different values. 
-
-### 6.1 index 
-
-
-#### 7. tf.maximum minimum 
+'''
 
 
+### 7. index gather? 
+'''
+A = tf.random_normal([3,4,2])
+
+npA = np.random.random((3,4,2))
+idx = [1,2]
+#print(npA[idx])
+#B = A[1,2,:]  # ok
+
+with tf.Session() as sess:
+ 	print(sess.run(B))
+'''
 
 
+#### 8. tf.maximum & minimum;  greater & less & equal
+'''
+A = tf.random_normal([3,2])
+B = tf.random_normal([3,2])
+C = tf.maximum(A,B)
+D = tf.maximum(A,0)
+E = tf.less(A,B)
+F = tf.less(A, 0.5)
+G = tf.equal(A + 0.5, A + 0.5)
+with tf.Session() as sess:
+	#print(sess.run([A,B,C,D]))
+	print(sess.run([A,B,E,F,G]))
+'''
 
 
+#### 9. tf.add/div  log/exp
+'''
+A = tf.random_uniform([3,2], minval = 1, maxval = 2)
+B = tf.random_uniform([3,2], minval = 1, maxval = 2)
+C = tf.add(A,B)
+D = tf.add(A,1)
+C = tf.div(A,B)
+D = tf.div(A,2)
+C = tf.log(A)
+D = tf.exp(C)
+
+with tf.Session() as sess:
+	print(sess.run([A,B,C,D]))
+	#print(sess.run([A,B,E,F]))
+'''
 
 
+##############   shape 
+#### 10. concat  
+t1 = [[1, 2, 3], [4, 5, 6]]
+t2 = [[7, 8, 9], [10, 11, 12]]
+t1 = tf.Variable(t1, name = 't1')
+t2 = tf.Variable(t2, name = 't2')
+t3 = tf.concat([t1, t2], 0, name = 't3')
+t3 = tf.Variable(t3, name = 't31')
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run(t3))
 
-
+for i in tf.trainable_variables():
+	print(i.name)
 
 
 
