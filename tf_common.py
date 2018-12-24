@@ -14,7 +14,11 @@ tf.set_random_seed(3)
 7. index gather? 
 8. tf.maximum & minimum;  greater & less & equal
 9. tf.add/div  log/exp
-10. concat
+10. concat & stack & unstack  
+11. tf.expand_dims & tf.squeeze
+12. reshape & shape & get_shape(can't use run) *******  & set_shape (different from reshape) & size ****** ### dynamic shape, static shape 
+13. transpose
+14. 
 ### list of list; numpy.array can be used as input for TF 
 """
 
@@ -44,7 +48,7 @@ with tf.Session() as sess:
     print(sess.run(z3))
 '''
 
-
+############################################################################################################
 #### 2. tf.cast
 '''
 a = tf.Variable([1,0,0,1,1])
@@ -54,7 +58,7 @@ sess.run(tf.global_variables_initializer())
 print(sess.run(b))
 '''
 
-
+############################################################################################################
 #### 3. tf.zeros / ones / zeros_like / ones_like 
 '''
 a = tf.Variable(tf.ones([2,3], dtype = tf.int32))
@@ -68,7 +72,7 @@ sess.run(tf.global_variables_initializer())
 print(sess.run(([a,b])))
 '''
 
-
+############################################################################################################
 #### 4. tf.constant & tf.Variable 
 '''
 a = tf.constant([[1, 2, 3], [4, 5, 6]], dtype = tf.float64, name = 'Const1' )
@@ -84,7 +88,7 @@ for i in tf.trainable_variables():
 	print(i.name)
 '''
 
-
+############################################################################################################
 #### 5. random_normal & random_uniform & random_shuffle 
 '''
 a = tf.random_normal([3,4,2], mean = 2, stddev = 1.0, dtype = tf.float32)
@@ -100,7 +104,7 @@ for i in tf.trainable_variables():
 '''
 
 
-
+############################################################################################################
 #### 6. tf.argmax & argmin
 '''
 #A = [[1,3,4,5,6]]
@@ -119,7 +123,7 @@ with tf.Session() as sess:
 	print(sess.run([A, VA, C]))		### note that A and VA has different values. 
 '''
 
-
+############################################################################################################
 ### 7. index gather? 
 '''
 A = tf.random_normal([3,4,2])
@@ -133,7 +137,7 @@ with tf.Session() as sess:
  	print(sess.run(B))
 '''
 
-
+############################################################################################################
 #### 8. tf.maximum & minimum;  greater & less & equal
 '''
 A = tf.random_normal([3,2])
@@ -148,7 +152,7 @@ with tf.Session() as sess:
 	print(sess.run([A,B,E,F,G]))
 '''
 
-
+############################################################################################################
 #### 9. tf.add/div  log/exp
 '''
 A = tf.random_uniform([3,2], minval = 1, maxval = 2)
@@ -165,21 +169,119 @@ with tf.Session() as sess:
 	#print(sess.run([A,B,E,F]))
 '''
 
-
+############################################################################################################
 ##############   shape 
-#### 10. concat  
+#### 10. concat & stack & unstack  
+##  tf.concat拼接的是除了拼接维度axis外其他维度的shape完全相同的张量，并且产生的张量的阶数不会发生变化，
+##  而tf.stack则会在新的张量阶上拼接，产生的张量的阶数将会增加
+'''
 t1 = [[1, 2, 3], [4, 5, 6]]
 t2 = [[7, 8, 9], [10, 11, 12]]
 t1 = tf.Variable(t1, name = 't1')
 t2 = tf.Variable(t2, name = 't2')
 t3 = tf.concat([t1, t2], 0, name = 't3')
 t3 = tf.Variable(t3, name = 't31')
+t4 = tf.stack([t1, t2], axis = -1)  ### -1, 0, 1, 2 == -1
+t4_shape = tf.shape(t4)
+t5 = tf.unstack(t4, axis = -1)
+t51 = t5[0]
+t52 = t5[1]
+t51bool = tf.equal(t51, t1)
+t52bool = tf.equal(t52, t2)
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	print(sess.run(t3))
-
+	print(sess.run([t4, t4_shape]))
+	print(sess.run([t51bool, t52bool]))
 for i in tf.trainable_variables():
 	print(i.name)
+'''
+
+############################################################################################################
+####  11. tf.expand_dims & tf.squeeze
+'''
+t1 = tf.random_normal([2,3])
+t2 = tf.expand_dims(t1, -2)  ### 0,1,2,-1, -2
+t2_shape = tf.shape(t2)
+t3 = tf.squeeze(t2, -2)
+t3_shape = tf.shape(t3)
+#t3 = tf.expand_dims(t1,-1)
+#t3_shape = tf.shape(t3)
+
+with tf.Session() as sess:
+	print(sess.run([t2_shape, t3_shape]))
+'''
+############################################################################################################
+####  12.  reshape & shape & get_shape(can't use run) *******  & set_shape (different from reshape) & size(list, np.array, tf.tensor)
+### dynamic shape , static shape   https://www.jianshu.com/p/2b88256ad206
+#### get_shape(tensor)   tensor can be tf.ones(xxx); tf.variable(tf.random_uniform(xxx))
+#### shape(list, array, tensor)
+'''
+t1 = tf.random_normal([2,3,4])
+t2 = tf.reshape(t1, [1,4,6])
+t2_shape = tf.shape(t2)
+#### size
+t2_size = tf.size(t2)
+x=tf.constant([[1,2,3],[4,5,6]])
+x = tf.random_uniform([2,3], minval = 0, maxval = 1)
+x = tf.Variable(x)
+#### get_shape(can't use session run, because it return a tuple)
+####  get_shape(tensor)   tensor can be tf.ones(xxx); tf.variable(tf.random_uniform(xxx));
+x_get_shape = x.get_shape().as_list() 	### get_shape return a tuple. 
+print(x.get_shape().as_list())
+
+#### shape(list, array, tensor)
+a = [[2,3], [0,1]]
+list_shape = tf.shape(a)
+a = np.zeros((3,2))
+np_shape = tf.shape(a)
+
+#### set_shape()
+t1 = tf.placeholder(tf.int32)
+t1.set_shape([3,2,4])
+t1_shape = tf.shape(t1)
+
+#t2_shape0 = tf.shape(t2)[0]
+#t2_shape1 = tf.shape(t2)[1]
+a = [[[1, 1, 1], [2, 2, 2]], [[3, 3, 3], [4, 4, 4]]]
+list_size = tf.size(a)
+a = np.ones((2,3,4))
+np_size = tf.size(a)
+
+with tf.Session() as sess:
+	print(sess.run([t2_shape, t2_size]))
+	#print(sess.run([t2_shape0]))
+	##print(sess.run(x_get_shape))	### can't use run ********
+	print(sess.run([list_shape, np_shape]))
+	print(sess.run(t1_shape))
+	print(sess.run([list_size, np_size]))
+'''
+############################################################################################################
+
+
+#### 13. transpose
+'''
+t1 = tf.random_normal([2,3,4])
+t1_shape = tf.shape(t1)
+t2 = tf.transpose(t1, perm = [2,1,0])
+t2_shape = tf.shape(t2)
+
+with tf.Session() as sess:
+	print(sess.run([t1_shape, t2_shape]))
+'''
+
+
+#### 14. tf.tile
+
+
+
+
+
+
+
+
+
+
 
 
 
