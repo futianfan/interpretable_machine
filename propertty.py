@@ -35,6 +35,7 @@ if __name__ == '__main__':
 	a = Exam(3)
 	print(a.score1)
 	a._score = 4
+	a.score1 += 0.5
 	#del a.score1
 	print(a.score1)
 	print(Exam.func2(3,4))
