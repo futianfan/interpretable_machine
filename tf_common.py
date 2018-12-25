@@ -5,25 +5,27 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 tf.set_random_seed(3)
 
 """ 
-1. tf.matrix, tf.matmul, 
+1. tf.multiply, tf.matmul, 
 2. tf.cast 
 3. tf.zeros / ones / zeros_like / ones_like 
 4. tf.constant & tf.Variable 
 5. random_normal & random_uniform & random_shuffle 
 6. tf.argmax  argmin 
-7. index gather? 
+7. tf.gather  tf.gather_nd *********  indexing 
 8. tf.maximum & minimum;  greater & less & equal
 9. tf.add/div  log/exp
 10. concat & stack & unstack  
 11. tf.expand_dims & tf.squeeze
 12. reshape & shape & get_shape(can't use run) *******  & set_shape (different from reshape) & size ****** ### dynamic shape, static shape 
 13. transpose
-14. 
+14. tf.tile   ## 堆叠 replicate
+15. tf.gather  tf.gather_nd 
+
 ### list of list; numpy.array can be used as input for TF 
 """
 
 
-#### 1. tf.matrix   element-wise multiply
+#### 1. tf.multiply   element-wise multiply
 #### tf.matmul  matrix-multiply
 '''
 x=tf.constant([[1.0,2.0,3.0],[1.0,2.0,3.0],[1.0,2.0,3.0]]) 
@@ -124,7 +126,7 @@ with tf.Session() as sess:
 '''
 
 ############################################################################################################
-### 7. index gather? 
+### 7. tf.gather  tf.gather_nd *******   index gather? 
 '''
 A = tf.random_normal([3,4,2])
 
@@ -136,6 +138,67 @@ idx = [1,2]
 with tf.Session() as sess:
  	print(sess.run(B))
 '''
+####  15.1 gather
+'''a = tf.Variable([[1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15]])
+index_a = tf.Variable([0,2])
+b = tf.Variable([1,2,3,4,5,6,7,8,9,10])
+index_b = tf.Variable([2,4,6,8])
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run(tf.gather(a, index_a)))
+	print(sess.run(tf.gather(b, index_b)))
+'''
+####   15.2 gather_nd **** https://qinqianshan.com/machine_learning/tensorflow/tf-gather_nd/
+'''
+a = tf.Variable([[1,2,3,4,5,6,7,8,9,10]])
+y = tf.Variable([0,2])
+p = tf.gather_nd(a,y) 
+y_ = tf.Variable([[0,2]])
+p_ = tf.gather_nd(a, y_)
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([p, p_]))
+'''
+#############################################################
+'''
+indices = [[0, 0], [1, 1]]
+params = [['a', 'b'], ['c', 'd']]
+output1 = tf.gather_nd(params, indices)
+indices = [[1], [0]]
+params = [['a', 'b'], ['c', 'd']]
+output2 = tf.gather_nd(params, indices)
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([output1, output2]))
+'''
+###  indices最里面的括号代表要提取的params的坐标，信息提取后加入到括号。
+'''
+indices = [[[0, 0, 1], [1, 0, 1]], [[0, 1, 1], [1, 1, 0]]]
+indices_shape = tf.shape(indices)
+params = [[['a0', 'b0'], ['c0', 'd0']],
+          [['a1', 'b1'], ['c1', 'd1']]]
+params_shape = tf.shape(params)
+output = tf.gather_nd(params, indices)
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([output, params_shape]))
+'''
+#############################################################
+#indices = [[[0, 0], [1, 0]], [[0, 1], [1, 1]], [[0, 1], [1, 1]]]  ### 3,2, (2)
+#indices = [[[0, 0], [1, 0]]]  ### 1,2, (2)
+indices = [[[0], [1]]]  ### 1,2, (1) (1)->2,4   => final shape is 1,2,2,4  
+indices_shape = tf.shape(indices)
+params = [[['a0', 'b0', ' ',  ' '], ['c0', 'd0', ' ',  ' ']],
+          [['a1', 'b1', ' ',  ' '], ['c1', 'd1', ' ',  ' ']],
+          [['a1', 'b1', ' ',  ' '], ['c1', 'd1', ' ',  ' ']]]  ### 3,2,4
+params_shape = tf.shape(params)
+output = tf.gather_nd(params, indices)
+output_shape = tf.shape(output)
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([output_shape, indices_shape, params_shape]))
+
+
 
 ############################################################################################################
 #### 8. tf.maximum & minimum;  greater & less & equal
@@ -270,12 +333,36 @@ with tf.Session() as sess:
 	print(sess.run([t1_shape, t2_shape]))
 '''
 
+############################################################################################################
+#### 14. tf.tile   ## 堆叠 replicate
+'''
+a = tf.constant([[1,2],[3,4]],name='a') 
+b = tf.tile(a,[2,3])
+b_shape = tf.shape(b)
 
-#### 14. tf.tile
+with tf.Session() as sess:
+	print(sess.run(b_shape))
+'''
+
+############################################################################################################
+####  15. tf.gather  tf.gather_nd   indexing slicing 
+
+
+############################################################################################################
+
+
+
+############################################################################################################
 
 
 
 
+############################################################################################################
+
+
+
+
+############################################################################################################
 
 
 
