@@ -24,7 +24,7 @@ tf.set_random_seed(3)
 17. where 		2 usages
 18. assign
 19. to_float  to_int  "cast" into float 
-
+20. TensorShape 
 ### list of list; numpy.array can be used as input for TF 
 """
 
