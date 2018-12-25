@@ -25,7 +25,16 @@ tf.set_random_seed(3)
 18. assign
 19. to_float  to_int  "cast" into float 
 20. TensorShape 
+21. clip_by_value
 ### list of list; numpy.array can be used as input for TF 
+
+
+advanced topic
+	Variable  get_variable
+	variable_scope
+	
+
+
 """
 
 
@@ -281,10 +290,10 @@ with tf.Session() as sess:
 	print(sess.run([t2_shape, t3_shape]))
 '''
 ############################################################################################################
-####  12.  reshape & shape & get_shape(can't use run) *******  & set_shape (different from reshape) & size(list, np.array, tf.tensor)
+####  12.  reshape & shape & get_shape(return a tuple, so can't use run) *******  & set_shape (different from reshape) & size(list, np.array, tf.tensor)
 ### dynamic shape , static shape   https://www.jianshu.com/p/2b88256ad206
 #### get_shape(tensor)   tensor can be tf.ones(xxx); tf.variable(tf.random_uniform(xxx))
-#### shape(list, array, tensor)
+#### shape(list, array, tensor) use sess.run
 '''
 t1 = tf.random_normal([2,3,4])
 t2 = tf.reshape(t1, [1,4,6])
@@ -407,13 +416,14 @@ with tf.Session() as sess:
 #### 18. assign
 ### http://www.soaringroad.com/article/11?p=194  
 ### A must be Variable!!! 
+'''
 A = tf.Variable(tf.constant(0.0), dtype=tf.float32)
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	for i in range(5):
 		sess.run(tf.assign(A, tf.add(A,10)))
 		print(sess.run(A))
-
+'''
 
 
 ############################################################################################################
@@ -432,7 +442,7 @@ with tf.Session() as sess:
 
 ############################################################################################################
 #### 20. TensorShape is a class
-
+'''
 input0 = tf.constant([[0,1,2],[3,4,5]])
 
 print(type(input0.shape))
@@ -444,10 +454,21 @@ print(input0.get_shape().as_list())
 print(input0.shape.ndims)
 print(input0.get_shape().ndims)
 print(tf.rank(input0))
+'''
+#### 21. clip_by_value 
+'''
+A = tf.random_normal(shape = [3,4])
+B = tf.clip_by_value(A, -1, 0.7)
+
+with tf.Session() as sess:
+	print(sess.run([A,B]))
+'''
 
 
-
-
+### 22. placeholder
+a = tf.placeholder(tf.float32, name = 'placeholder')
+with tf.Session() as sess:
+	print(sess.run([a], feed_dict = {a: 0.9}))
 
 
 
