@@ -14,12 +14,16 @@ tf.set_random_seed(3)
 7. tf.gather  tf.gather_nd *********  indexing 
 8. tf.maximum & minimum;  greater & less & equal
 9. tf.add/div  log/exp
-10. concat & stack & unstack  
+10. concat & stack & unstack  ##增加维度stack 
 11. tf.expand_dims & tf.squeeze
 12. reshape & shape & get_shape(can't use run) *******  & set_shape (different from reshape) & size ****** ### dynamic shape, static shape 
-13. transpose
+13. transpose 
 14. tf.tile   ## 堆叠 replicate
-15. tf.gather  tf.gather_nd 
+15. reduce_sum reduce_mean 
+16. fill
+17. where 		2 usages
+18. assign
+19. to_float  to_int  "cast" into float 
 
 ### list of list; numpy.array can be used as input for TF 
 """
@@ -184,6 +188,7 @@ with tf.Session() as sess:
 	print(sess.run([output, params_shape]))
 '''
 #############################################################
+'''
 #indices = [[[0, 0], [1, 0]], [[0, 1], [1, 1]], [[0, 1], [1, 1]]]  ### 3,2, (2)
 #indices = [[[0, 0], [1, 0]]]  ### 1,2, (2)
 indices = [[[0], [1]]]  ### 1,2, (1) (1)->2,4   => final shape is 1,2,2,4  
@@ -197,6 +202,7 @@ output_shape = tf.shape(output)
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	print(sess.run([output_shape, indices_shape, params_shape]))
+'''
 
 
 
@@ -345,24 +351,104 @@ with tf.Session() as sess:
 '''
 
 ############################################################################################################
-####  15. tf.gather  tf.gather_nd   indexing slicing 
+#### 15. reduce_*: reduce_sum reduce_mean reduce_any
+## reduce_all tf.reduce_max  reduce_logsumexp reduce_min  reduce_prod
+'''
+a = tf.random_normal([2,3,4])
+sum_a = tf.reduce_sum(a, 1, keep_dims=False)
+#### keep_dims=False => [2 4];  keep_dims=True => [2 1 4]
+#sum_a = tf.reduce_mean(a,1)
+sum_a_shape = tf.shape(sum_a)
+with tf.Session() as sess:
+	print(sess.run([sum_a_shape, a, sum_a]))
+'''
+############################################################################################################
+#### 16. fill, only scalar 
+####### contrast to tf.constant 
+'''
+a = tf.fill([2, 3], 9)
+with tf.Session() as sess:
+	print(sess.run(a))
+'''
+############################################################################################################
+#### 17. where 
+######### tf.gather_nd   where 和 gather_nd 互为逆过程
+
+### usage 1
+### example 1.
+'''
+input1 = [[[True, False], [True, False]], [[False, True], [False, True]], [[False, False], [False, True]]]   
+#### 6,2
+output1 = tf.where(input1)
+input2 = tf.gather_nd(input1, output1)
+with tf.Session() as sess:
+	print(sess.run([output1, input2]))
+'''
+########################################################################
+### example 2.
+'''
+input1 = tf.random_normal([4,3])
+output1 = tf.where(tf.greater(input1, 0.5))
+with tf.Session() as sess:
+	print(sess.run([input1, output1]))
+'''
+############################################################################################
+
+### usage 2
+'''
+x = [[1,2,3],[4,5,6]]
+y = [[7,8,9],[10,11,12]]
+condition3 = [[True,False,False],
+             [False,True,True]]
+with tf.Session() as sess:
+	print(sess.run(tf.where(condition3,x,y)))
+'''
+############################################################################################################
+#### 18. assign
+### http://www.soaringroad.com/article/11?p=194  
+### A must be Variable!!! 
+A = tf.Variable(tf.constant(0.0), dtype=tf.float32)
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	for i in range(5):
+		sess.run(tf.assign(A, tf.add(A,10)))
+		print(sess.run(A))
+
 
 
 ############################################################################################################
+#### 19. to_float  to_int  "cast" into float
+'''
+a = tf.constant([1,2,3])
+print(a.dtype)
+fa = tf.to_float(a)
+print(fa.dtype)
 
-
+a = tf.constant([1.2, 2.5, 3.9])
+fa = tf.to_int32(a)
+with tf.Session() as sess:
+	print(sess.run(fa))
+'''
 
 ############################################################################################################
+#### 20. TensorShape is a class
+
+input0 = tf.constant([[0,1,2],[3,4,5]])
+
+print(type(input0.shape))
+print(type(input0.get_shape()))
+print(type(tf.shape(input0)))
+
+print(input0.shape.as_list())
+print(input0.get_shape().as_list())
+print(input0.shape.ndims)
+print(input0.get_shape().ndims)
+print(tf.rank(input0))
 
 
 
 
-############################################################################################################
 
-
-
-
-############################################################################################################
 
 
 
