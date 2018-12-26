@@ -32,6 +32,8 @@ tf.set_random_seed(3)
 advanced topic
 	Variable  get_variable
 	variable_scope
+	## Tensorflow踩坑记  https://blog.csdn.net/hejunqing14/article/details/52688825  
+	https://blog.csdn.net/zsf442553199/article/details/79869377
 	
 
 
