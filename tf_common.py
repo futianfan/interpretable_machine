@@ -36,6 +36,8 @@ advanced topic
 	https://blog.csdn.net/zsf442553199/article/details/79869377
 	
 
+	stop_gradient() & gradient()	
+
 
 """
 
