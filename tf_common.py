@@ -36,7 +36,21 @@ advanced topic
 	https://blog.csdn.net/zsf442553199/article/details/79869377
 	
 
-	stop_gradient() & gradient()	
+==========How to freeze variable==========
+	1. stop_gradient() & gradient()	
+	2. get_variable/variable(trainable = False)
+	3. 从trainOP上入手
+	######### trainOp   variable_scope("discriminator")
+	theta_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                     "discriminator")
+	D_solver = tf.train.AdamOptimizer(learning_rate = self.learning_rate).minimize(D_loss, var_list=theta_D)
+
+
+
+	查看trainable变量
+		for i in tf.trainable_variables():
+			print(i.name)
+
 
 
 """
