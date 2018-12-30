@@ -293,6 +293,12 @@ for i in tf.trainable_variables():
 	print(i.name)
 '''
 
+t1 = tf.random_normal(shape = [32, 10, 1000], dtype = tf.float32)
+t2 = tf.unstack(value = t1, num = 10, axis = 1)
+assert isinstance(t2, list)
+assert len(t2) == 10
+assert t2[0].get_shape().as_list() == [32, 1000]
+
 ############################################################################################################
 ####  11. tf.expand_dims & tf.squeeze
 '''
@@ -484,10 +490,11 @@ with tf.Session() as sess:
 
 
 ### 22. placeholder
+'''
 a = tf.placeholder(tf.float32, name = 'placeholder')
 with tf.Session() as sess:
 	print(sess.run([a], feed_dict = {a: 0.9}))
-
+'''
 
 
 
