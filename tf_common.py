@@ -26,6 +26,9 @@ tf.set_random_seed(3)
 19. to_float  to_int  "cast" into float 
 20. TensorShape 
 21. clip_by_value
+22. placeholder
+23. tf.norm  matrix norm 
+
 ### list of list; numpy.array can be used as input for TF 
 
 
@@ -509,6 +512,13 @@ with tf.Session() as sess:
 	print(sess.run([a], feed_dict = {a: 0.9}))
 '''
 
+### 23. tf.norm  matrix norm 
+
+a = tf.random_normal(shape = [2,2], dtype = tf.float32)
+b = tf.norm(tensor = a)	## F-norm 
+a_l1 = tf.norm(tensor = a, ord = 1)
+with tf.Session() as sess:
+	print(sess.run([a,b, a_l1]))
 
 
 
