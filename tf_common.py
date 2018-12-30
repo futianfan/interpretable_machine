@@ -248,6 +248,12 @@ with tf.Session() as sess:
 	print(sess.run([A,B,E,F,G]))
 '''
 
+"""
+A = tf.random_normal([3,2])
+B = tf.maximum(A, 0)
+with tf.Session() as sess:
+	print(sess.run([A,B]))
+""" 
 ############################################################################################################
 #### 9. tf.add/div  log/exp
 '''
