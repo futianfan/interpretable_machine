@@ -3,6 +3,8 @@ import numpy as np
 import os 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 tf.set_random_seed(3)
+np.random.seed(1)
+tf.set_random_seed(5)
 
 """ 
 1. tf.multiply, tf.matmul, 
@@ -28,6 +30,9 @@ tf.set_random_seed(3)
 21. clip_by_value
 22. placeholder
 23. tf.norm  matrix norm 
+24. tf.nn.sigmoid_cross_entropy_with_logits
+25. tf.nn.softmax_cross_entropy_with_logits
+26. embedding_lookup
 
 ### list of list; numpy.array can be used as input for TF 
 
@@ -512,14 +517,74 @@ with tf.Session() as sess:
 	print(sess.run([a], feed_dict = {a: 0.9}))
 '''
 
-### 23. tf.norm  matrix norm 
-
+### 23. tf.norm  matrix norm, normalized by rows/columns
+"""
 a = tf.random_normal(shape = [2,2], dtype = tf.float32)
 b = tf.norm(tensor = a)	## F-norm 
 a_l1 = tf.norm(tensor = a, ord = 1)
+a_normalized = tf.nn.l2_normalize(a, axis = 1)  
+### after normalize, each row vector has unit length.  
 with tf.Session() as sess:
-	print(sess.run([a,b, a_l1]))
+	print(sess.run([a,b, a_l1, a_normalized]))
+"""
 
+
+### 24. tf.nn.sigmoid_cross_entropy_with_logits 
+'''
+logits = tf.random_normal(shape = [2,2], dtype = tf.float32)
+label = tf.ones_like(logits, dtype = tf.float32)
+
+loss = tf.nn.sigmoid_cross_entropy_with_logits(logits = logits,
+									labels = label)
+loss_sum = tf.reduce_sum(loss, 1)
+loss_mean = tf.reduce_mean(loss_sum)
+with tf.Session() as sess:
+	print( sess.run([logits, label, loss, loss_sum, loss_mean]) )
+'''
+### 25. tf.nn.softmax_cross_entropy_with_logits
+'''
+logits = tf.random_normal(shape = [2,2], dtype = tf.float32)
+labels = tf.placeholder(dtype = tf.int32, shape = [None, 2])
+lab = [[1,0], [0,1]]
+loss = tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = labels)
+with tf.Session() as sess:
+	print(sess.run([logits, labels, loss], feed_dict = {labels: lab}))
+'''
+"""
+[array([[-1.5072867 , -0.8529847 ],
+       [-0.78440124, -0.26547712]], dtype=float32), array([[1, 0],
+       [0, 1]], dtype=int32), array([1.0728838 , 0.46697435], dtype=float32)]
+
+exp(-1.5072867) / (exp(-1.5072867) + exp(-0.8529847))   =>  0.34202074733030896
+- log(0.34202074733030896) => 1.072883879051055
+"""
+
+
+###  26. embedding_lookup
+'''
+embed_mat = np.random.random([5,2])
+seq_idx = tf.placeholder(dtype = tf.int32, shape = [None, 3])
+lst = [[1,2,3], [0,1,4]]
+embedded_seq = tf.nn.embedding_lookup(params = embed_mat, ids = seq_idx)
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	embedded_seq0 = sess.run((embedded_seq), 
+								feed_dict = {seq_idx: lst})
+print(embed_mat)
+print(embedded_seq0)
+#assert embedded_seq0.get_shape().as_list() == [2, 3, 2]
+assert embedded_seq0.shape == (2,3,2)
+'''
+"""
+c = np.random.random([10,1])
+b = tf.nn.embedding_lookup(c, [1, 3])
+ 
+with tf.Session() as sess:
+	sess.run(tf.initialize_all_variables())
+	print(sess.run(c))
+### why is it a bug?   It is interesting ********************************** Answer is sess.run's target object can only be tensor, not list, not np.array.
+"""
 
 
 
