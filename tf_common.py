@@ -33,6 +33,7 @@ tf.set_random_seed(5)
 24. tf.nn.sigmoid_cross_entropy_with_logits
 25. tf.nn.softmax_cross_entropy_with_logits
 26. embedding_lookup
+27. tf.nn.conv1d & tf.layers.conv1d
 
 ### list of list; numpy.array can be used as input for TF 
 
@@ -561,10 +562,12 @@ exp(-1.5072867) / (exp(-1.5072867) + exp(-0.8529847))   =>  0.34202074733030896
 
 
 ###  26. embedding_lookup
-'''
+"""
 embed_mat = np.random.random([5,2])
 seq_idx = tf.placeholder(dtype = tf.int32, shape = [None, 3])
 lst = [[1,2,3], [0,1,4]]
+#lst = [[1,2,3], [0,1,4]]
+
 embedded_seq = tf.nn.embedding_lookup(params = embed_mat, ids = seq_idx)
 
 with tf.Session() as sess:
@@ -575,8 +578,11 @@ print(embed_mat)
 print(embedded_seq0)
 #assert embedded_seq0.get_shape().as_list() == [2, 3, 2]
 assert embedded_seq0.shape == (2,3,2)
-'''
 """
+
+
+"""
+###### Interesting problem
 c = np.random.random([10,1])
 b = tf.nn.embedding_lookup(c, [1, 3])
  
@@ -584,6 +590,30 @@ with tf.Session() as sess:
 	sess.run(tf.initialize_all_variables())
 	print(sess.run(c))
 ### why is it a bug?   It is interesting ********************************** Answer is sess.run's target object can only be tensor, not list, not np.array.
+"""
+
+
+### 27. tf.nn.conv1d & tf.layers.conv1d
+"""
+embed_dim = 15
+length = 7
+out_filter = 9
+inputs = tf.placeholder('float', shape=[None, length, embed_dim])   
+#### length is 6; embedding dimension is 8; 
+out = tf.layers.conv1d(inputs = inputs, filters = out_filter, kernel_size = 3, strides = 1, padding = 'valid')
+
+np_inputs = np.random.random((10, length, embed_dim))
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	output = sess.run([out], feed_dict = {inputs: np_inputs})
+	output = output[0]
+	print(output.shape)
+"""
+"""
+input:  batch_size = 10, length = 6; embed_dim = 8
+filter num = 5, kernerl = 3, stride = 1, padding = 'valid'
+output: batch_size = 10, new_length = 5, out_channel = 9
+
 """
 
 
