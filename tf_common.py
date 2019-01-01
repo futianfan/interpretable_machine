@@ -637,13 +637,24 @@ print(z_np)
 
 
 ### 29. tf dtype
+"""
 a = tf.random_normal([2,3],dtype = tf.float32)
 assert a.dtype == tf.float32
+"""
 
 
-
-
-
+###  example
+logits = tf.random_normal([3,2], dtype = tf.float32)
+y = tf.placeholder(shape = [None, 2], dtype = tf.int32)
+Tweight = tf.placeholder(shape = [None], dtype = tf.float32)
+list_y = [[1, 0], [0, 1], [1, 0]]
+weight = [1, 2, 3]
+loss = tf.nn.softmax_cross_entropy_with_logits(
+										labels=y, 
+										logits=logits)
+weighted_loss = tf.reduce_mean(Tweight * loss)
+with tf.Session() as sess:
+	print(sess.run([loss, weighted_loss], feed_dict={y: list_y, Tweight:weight}))
 
 
 
