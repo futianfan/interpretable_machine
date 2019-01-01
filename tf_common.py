@@ -34,6 +34,8 @@ tf.set_random_seed(5)
 25. tf.nn.softmax_cross_entropy_with_logits
 26. embedding_lookup
 27. tf.nn.conv1d & tf.layers.conv1d
+28. tensor => np.array
+29. tf dtype
 
 ### list of list; numpy.array can be used as input for TF 
 
@@ -562,7 +564,7 @@ exp(-1.5072867) / (exp(-1.5072867) + exp(-0.8529847))   =>  0.34202074733030896
 
 
 ###  26. embedding_lookup
-"""
+'''
 embed_mat = np.random.random([5,2])
 seq_idx = tf.placeholder(dtype = tf.int32, shape = [None, 3])
 lst = [[1,2,3], [0,1,4]]
@@ -576,10 +578,10 @@ with tf.Session() as sess:
 								feed_dict = {seq_idx: lst})
 print(embed_mat)
 print(embedded_seq0)
+print(type(embedded_seq0))
 #assert embedded_seq0.get_shape().as_list() == [2, 3, 2]
 assert embedded_seq0.shape == (2,3,2)
-"""
-
+'''
 
 """
 ###### Interesting problem
@@ -594,27 +596,55 @@ with tf.Session() as sess:
 
 
 ### 27. tf.nn.conv1d & tf.layers.conv1d
-"""
+'''
 embed_dim = 15
-length = 7
+length = 2
+conv_kernel_size = 11
 out_filter = 9
+pool_size = 6
 inputs = tf.placeholder('float', shape=[None, length, embed_dim])   
 #### length is 6; embedding dimension is 8; 
-out = tf.layers.conv1d(inputs = inputs, filters = out_filter, kernel_size = 3, strides = 1, padding = 'valid')
+out = tf.layers.conv1d(inputs = inputs, filters = out_filter, kernel_size = conv_kernel_size, strides = 1, padding = 'same')	
+### padding:  'valid', 'same'. 
+
+mp = tf.layers.max_pooling1d(inputs = out, pool_size = pool_size, strides = 1, padding = 'same')
 
 np_inputs = np.random.random((10, length, embed_dim))
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
-	output = sess.run([out], feed_dict = {inputs: np_inputs})
-	output = output[0]
-	print(output.shape)
-"""
+	#conv, = sess.run([out], feed_dict = {inputs: np_inputs})
+	#print(conv.shape)
+	conv, mpool  = sess.run([out, mp], feed_dict = {inputs: np_inputs})
+	print(mpool.shape)
+	#assert mpool.shape[1] == length - conv_kernel_size + 1 - pool_size + 1
+'''
+
 """
 input:  batch_size = 10, length = 6; embed_dim = 8
 filter num = 5, kernerl = 3, stride = 1, padding = 'valid'
 output: batch_size = 10, new_length = 5, out_channel = 9
-
+10, 5, 9
+10, 3, 9
 """
+
+### 28. tf.Tensor => np.array, no direct way
+'''
+z = tf.random_normal([2, 3])
+with tf.Session() as sess:
+	z_np = z.eval()
+print(z_np)
+'''
+
+
+### 29. tf dtype
+a = tf.random_normal([2,3],dtype = tf.float32)
+assert a.dtype == tf.float32
+
+
+
+
+
+
 
 
 
