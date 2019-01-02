@@ -643,7 +643,8 @@ assert a.dtype == tf.float32
 """
 
 
-###  example
+###  example 1: compute weighted cross-entropy loss. 
+'''
 logits = tf.random_normal([3,2], dtype = tf.float32)
 y = tf.placeholder(shape = [None, 2], dtype = tf.int32)
 Tweight = tf.placeholder(shape = [None], dtype = tf.float32)
@@ -655,6 +656,140 @@ loss = tf.nn.softmax_cross_entropy_with_logits(
 weighted_loss = tf.reduce_mean(Tweight * loss)
 with tf.Session() as sess:
 	print(sess.run([loss, weighted_loss], feed_dict={y: list_y, Tweight:weight}))
+'''
+
+
+### example 2: feedforward prototype layer 
+
+"""
+tf.shape 必须通过sess.run;   X.get_shape() 构图的时候出现None， 构图的时候需要batch_size这个信息  如何处理？
+"""
+
+"""
+batch_size = 2
+hidden_dim = 2
+prototype_num = 3
+X_2 = tf.random_normal([batch_size, hidden_dim])
+X_4 = np.random.random((batch_size, hidden_dim))
+
+### build graph 
+X_ = tf.placeholder(shape = [None, hidden_dim], dtype = tf.float32)
+X = tf.placeholder(shape = [batch_size, hidden_dim], dtype = tf.float32)
+prototype_vector_ = tf.random_normal([prototype_num, hidden_dim])
+'''
+def prototype_layer(X, prototype_vector):
+	#with tf.variable_scope('prototype') as scope:
+	#batch_size, hidden_dim = tf.shape(X)
+	#prototype_num, hidden_dim = tf.shape(prototype_vector)
+	batch_size, hidden_dim = X.get_shape()
+	prototype_num, hidden_dim = prototype_vector.get_shape()	
+	X_extend = tf.stack([X] * prototype_num, axis = 1)
+	prototype_vector_extend = tf.stack([prototype_vector] * batch_size, axis = 0)
+	X_dif = X_extend - prototype_vector_extend
+	output = tf.norm(X_dif, ord = 'euclidean', axis = 2)
+	return output
+'''
+#output = prototype_layer(X_, prototype_vector_)
+'''
+batch_size, hidden_dim = tf.shape(X_)
+prototype_num, hidden_dim = tf.shape(prototype_vector_)
+X_extend = tf.stack([X] * prototype_num, axis = 1)
+prototype_vector_extend = tf.stack([prototype_vector] * batch_size, axis = 0)
+X_dif = X_extend - prototype_vector_extend
+output = tf.norm(X_dif, ord = 'euclidean', axis = 2)
+'''
+def prototype_layer(X, prototype_vector):
+	### X: b, d
+	### prototype_vector:   p, d
+	prototype_num, hidden_dim = prototype_vector.get_shape()
+	X_extend = tf.stack([X] * prototype_num, axis = 1)	#### b, p, d
+	X_extend_split = tf.unstack(value = X_extend, axis = 0)  ### list of length b, each element is p,d
+	X_2 = [tf.norm(X_i - prototype_vector, ord = 'euclidean', axis = 1)   \
+								for X_i in X_extend_split]
+	X_3 = tf.stack(X_2, axis = 0)
+	#assert X_3.get_shape() == (batch_size, prototype_num)
+	return X_3
+
+#output = prototype_layer(X, prototype_vector_)
+output = prototype_layer(X_, prototype_vector_)
+"""
+
+'''
+with tf.Session() as sess:
+	#a, b = sess.run([X_extend, prototype_vector_extend])
+	#assert a.shape == (batch_size, prototype_num, hidden_dim)
+	#assert b.shape == (batch_size, prototype_num, hidden_dim)
+	#c = sess.run([output], feed_dict = {X_:X_2})
+	c = sess.run([output], feed_dict = {X:X_4})	
+	c = c[0]
+	#print(c.shape)
+	assert c.shape == (batch_size, prototype_num)
+	#print(sess.run([X_, prototype_vector_, output]))
+'''
+
+
+### example 2.1 
+'''
+batch_size = 2
+hidden_dim = 2
+prototype_num = 3
+npx = np.random.random((batch_size, hidden_dim))
+X_ = tf.placeholder(shape = [None, hidden_dim], dtype = tf.float32)
+y = tf.random_normal([hidden_dim])
+#X = tf.unstack(value = X_,  axis = 0)
+#print(X_.get_shape()[0])
+X = X_ - y
+with tf.Session() as sess:
+	print(sess.run([X], feed_dict = {X_:npx}))
+'''
+
+### example 2.2
+batch_size = 2
+hidden_dim = 2
+prototype_num = 3
+npx = np.random.random((batch_size, hidden_dim))
+X_ = tf.placeholder(shape = [None, hidden_dim], dtype = tf.float32)
+prototype_vector_ = tf.random_normal(shape = [prototype_num, hidden_dim])
+
+
+def prototype_layer(X_, prototype_vector_):
+	prototype_num = prototype_vector_.get_shape()[0]
+	output = []
+	for i in range(prototype_num):
+		y = X_ - tf.gather(prototype_vector_, [i])
+		#y = X_ - tf.gather(prototype_vector_, tf.Variable([i]))		
+		y = tf.norm(y, ord = 'euclidean', axis = 1)
+		y = tf.reshape(y, [1, -1])
+		if i == 0:
+			output = y 
+		else:
+			output = tf.concat([output, y], 0)
+	return output
+
+output = prototype_layer(X_, prototype_vector_)
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([output], feed_dict = {X_:npx}))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
