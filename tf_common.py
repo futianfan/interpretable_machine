@@ -36,6 +36,7 @@ tf.set_random_seed(5)
 27. tf.nn.conv1d & tf.layers.conv1d
 28. tensor => np.array
 29. tf dtype
+30 tf.scatter_update scatter_nd ------indexing & update 
 
 ### list of list; numpy.array can be used as input for TF 
 
@@ -743,8 +744,10 @@ with tf.Session() as sess:
 	print(sess.run([X], feed_dict = {X_:npx}))
 '''
 
+
 ### example 2.2
-batch_size = 2
+'''
+batch_size = 4
 hidden_dim = 2
 prototype_num = 3
 npx = np.random.random((batch_size, hidden_dim))
@@ -753,8 +756,11 @@ prototype_vector_ = tf.random_normal(shape = [prototype_num, hidden_dim])
 
 
 def prototype_layer(X_, prototype_vector_):
+	"""
+		X_: b, d   batch_size  , dim   ***** b is None owing to ***placeholder****
+		prototype_vector_: p, d   prototype_num, dim
+	"""
 	prototype_num = prototype_vector_.get_shape()[0]
-	output = []
 	for i in range(prototype_num):
 		y = X_ - tf.gather(prototype_vector_, [i])
 		#y = X_ - tf.gather(prototype_vector_, tf.Variable([i]))		
@@ -764,6 +770,7 @@ def prototype_layer(X_, prototype_vector_):
 			output = y 
 		else:
 			output = tf.concat([output, y], 0)
+	output = tf.transpose(output, perm = [1,0])  ### p,b => b,p
 	return output
 
 output = prototype_layer(X_, prototype_vector_)
@@ -771,18 +778,84 @@ output = prototype_layer(X_, prototype_vector_)
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	print(sess.run([output], feed_dict = {X_:npx}))
+'''
 
 
 
+### example 2.3
+'''
+batch_size = 4
+hidden_dim = 2
+prototype_num = 3
+npx = np.random.random((batch_size, hidden_dim))
+X_ = tf.placeholder(shape = [None, hidden_dim], dtype = tf.float32)
+prototype_vector_ = tf.random_normal(shape = [prototype_num, hidden_dim])
+
+
+def prototype_layer(X_, prototype_vector_):
+	"""
+		X_: b, d   batch_size  , dim   ***** b is None owing to ***placeholder****
+		prototype_vector_: p, d   prototype_num, dim
+	"""
+	prototype_num = prototype_vector_.get_shape()[0]
+	X_extend = tf.stack([X_] * prototype_num, axis = 1)
+	assert X_extend.get_shape()[1] == prototype_num
+	prototype_vector_extend = tf.expand_dims(prototype_vector_, 0)
+	assert prototype_vector_extend.get_shape()[:2] == (1, prototype_num)
+	return tf.norm(X_extend - prototype_vector_extend, axis = 2)
+
+
+output = prototype_layer(X_, prototype_vector_)
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([output], feed_dict = {X_:npx}))
+
+'''
 
 
 
+### example 2.4: return minimum euclidean distance for prototype loss
+'''
+batch_size = 4
+hidden_dim = 2
+prototype_num = 3
+#npx = np.random.random((batch_size, hidden_dim))
+npx = np.zeros((batch_size, hidden_dim))
+X_ = tf.placeholder(shape = [None, hidden_dim], dtype = tf.float32)
+prototype_vector_ = tf.random_normal(shape = [prototype_num, hidden_dim])
 
 
+def prototype_loss(X_, prototype_vector_):
+	"""
+		X_: ?, d   batch_size  , dim   ***** ?==b is None owing to ***placeholder****
+		prototype_vector_: p, d   prototype_num, dim
+	"""
+	prototype_num = prototype_vector_.get_shape()[0]
+	X_extend = tf.stack([X_] * prototype_num, axis = 1)  ### ?, p, d
+	prototype_vector_extend = tf.expand_dims(prototype_vector_, 0)  ### 1, p, d
+	X_dif = tf.norm(X_extend - prototype_vector_extend, ord = 'euclidean', axis = 2)  ### ?, p
+	X_min = tf.reduce_min(X_dif, axis = 1)
+	return X_min
 
 
+output = prototype_loss(X_, prototype_vector_)
 
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([X_, prototype_vector_, output], feed_dict = {X_:npx}))
 
+'''
+
+#### 30 tf.scatter_update scatter_nd ------indexing & update 
+###  tf.gather tf.gather_nd
+###  a is tf.Tensor    a[1] = blabla
+a = tf.Variable(tf.random_normal([5,4]))
+b = tf.scatter_update(a, [0, 1], [[1, 1, 0, 0], [1, 0, 4, 0]])
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([b]))
 
 
 
