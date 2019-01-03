@@ -7,6 +7,82 @@ np.random.seed(1)
 tf.set_random_seed(5)
 
 """ 
+
+tf.reverse
+tf.scan
+tf.range
+tf.map_fn
+tf.convert_to_tensor
+tf.rank 
+tf.split
+tf.stop_gradient
+tf.convert_to_tensor
+tf.size
+tf.identity
+tf.cond
+tf.convert_to_tensor
+tf.equal
+tf.cast
+tf.tensordot
+tf.while_loop
+
+==================================== NLP term ====================================
+tf.one_hot  
+tf.pad
+tf.sequence_mask
+==================================== NLP term ====================================
+
+
+
+tf.to_int32 / to_int64
+tf.to_float ***
+
+tf.name_scope
+tf.get_variable(name=hparams["name"],
+tf.Variable
+
+get_collection
+get_collection_ref
+
+tf.local_variables_initializer
+tf.tables_initializer
+
+
+tf.shape  get_shape
+tf.TensorShape			*******
+
+
+tf.contrib.layers.fully_connected
+tf.contrib.rnn.RNNCell
+tf.contrib.seq2seq.SampleEmbeddingHelper
+tf.contrib.seq2seq.TrainingHelper(
+tf.contrib.seq2seq.BasicDecoder(
+f.contrib.seq2seq.dynamic_decode(tf_decoder)
+classtype=tf.contrib.seq2seq.AttentionMechanism)
+tf.contrib.seq2seq.tile_batch(initial_state, inputs_shape[2])
+
+tf.distributions.Categorical(logits=logits)
+
+tf.logical_and / logical_not
+
+
+Modules
+
+	tf.layers   93
+	tf.nn 		57
+	tf.estimator 99
+	tf.train 	23
+	tf.contrib   19 
+	tf.contrib.seq2seq 17 
+	tf.app
+	tf.gfile
+	tf.test.TestCase*** 
+	tf.data******
+	tf.compat***** 
+
+
+
+
 1. tf.multiply, tf.matmul, 
 2. tf.cast 
 3. tf.zeros / ones / zeros_like / ones_like 
@@ -37,8 +113,109 @@ tf.set_random_seed(5)
 28. tensor => np.array
 29. tf dtype
 30 tf.scatter_update scatter_nd ------indexing & update 
+31 tf.exp / div / sqrt / rsqrt (1 / sqrt(x))
+32 tf.compat.as_str / as_bytes / as_text
 
 ### list of list; numpy.array can be used as input for TF 
+
+
+
+
+
+grep "tf\." `find . -name \*.py` |  grep -v "tf.matmul" | grep -v "tf.multiply"\
+ | grep -v tf.ones | grep -v tf.zeros | grep -v tf.random_normal | \
+ grep -v tf.random_uniform \
+ | grep -v tf.placeholder \
+ | grep -v tf.embedding_lookup \
+ | grep -v tf.clip_by_value \
+ | grep -v tf.stack \
+ | grep -v tf.unstack \
+ | grep -v tf.concat \
+ | grep -v tf.ones_like \
+ | grep -v tf.zeros_like \
+ | grep -v tf.gather \
+ | grep -v tf.maximum \
+ | grep -v tf.minimum \
+ | grep -v tf.transpose \
+ | grep -v tf.reduce_ \
+ | grep -v tf.norm \
+ | grep -v tf.layers\
+ | grep -v tf.nn\
+ | grep -v tf.estimator\
+ | grep -v tf.train\
+ | grep -v tf.int \
+ | grep -v tf.float \
+ | grep -v variable_scope \
+ | grep -v tf.reshape\
+ | grep -v tf.expand_dims \
+ | grep -v tf.squeeze \
+ | grep -v tf.constant\
+ | grep -v tf.tile \
+ | grep -v tf.floor \
+ | grep -v tf.test.TestCase \
+ | grep -v tf.test.main \
+ | grep -v tf.global_variables_initializer \
+ | grep -v tf.add \
+ | grep -v tf.div \
+ | grep -v tf.gfile \
+ | grep -v tf.contrib \
+ | grep -v tf.app \
+ | grep -v tf.distribution \
+ | grep -v tf.stop_gradient \
+ | grep -v tf.equal \
+ | grep -v tf.one_hot \
+ | grep -v tf.scatter \
+ | grep -v tf.shape \
+ | grep -v tf.compat.as_text \
+ | grep -v tf.logical_ \
+ | grep -v tf.to_float \
+ | grep -v tf.to_int \
+ | grep -v tf.sequence_mask \
+ | grep -v tf.TensorShape \
+ | grep -v tf.where \
+ | grep -v tf.identity \
+ | grep -v tf.string \
+ | grep -v tf.abs \
+ | grep -v tf.name_scope \
+ | grep -v tf.get_variable \
+ | grep -v tf.bool \
+ | grep -v tf.split \
+ | grep -v tf.argmax \
+ | grep -v tf.greater \
+ | grep -v tf.less \
+ | grep -v tf.pad \
+ | grep -v tf.rank \
+ | grep -v tf.compat.as_bytes \
+ | grep -v tf.fill \
+ | grep -v tf.cast \
+ | grep -v tf.exp \
+ | grep -v tf.cond \
+ | grep -v tf.convert_to_tensor\
+ | grep -v tf.cum \
+ | grep -v tf.log \
+ | grep -v tf.tables_initializer \
+ | grep -v tf.local_variables_initializer \
+ | grep -v tf.errors \
+ | grep -v tf.get_collection \
+ | grep -v tf.Session \
+ | grep -v tf.clip_by_global_norm \
+ | grep -v tf.assign \
+ | grep -v tf.make_template \
+ | grep -v tf.get_collection_ref \
+ | grep -v tf.keras.regularizers \
+ | grep -v tf.data \
+ | grep -v tf.map_fn \
+ | grep -v tf.compat.as_str \
+ | grep -v tf.size \
+ | grep -v tf.while_loop \
+ | awk -F ":" '{print $2}' | grep tf
+
+
+grep tf.errors `find . -name \*.py` | wc -l
+
+
+
+
 
 
 advanced topic
@@ -47,6 +224,7 @@ advanced topic
 	## Tensorflow踩坑记  https://blog.csdn.net/hejunqing14/article/details/52688825  
 	https://blog.csdn.net/zsf442553199/article/details/79869377
 	
+	tf.TensorShape  tf.shape   get_shape
 
 ==========How to freeze variable==========
 	1. stop_gradient() & gradient()	
@@ -490,7 +668,9 @@ with tf.Session() as sess:
 '''
 
 ############################################################################################################
-#### 20. TensorShape is a class
+#### 20. TensorShape**** is a class
+### get_shape, tf.shape()  get_shape returns a tuple. 
+
 '''
 input0 = tf.constant([[0,1,2],[3,4,5]])
 
@@ -504,6 +684,8 @@ print(input0.shape.ndims)
 print(input0.get_shape().ndims)
 print(tf.rank(input0))
 '''
+
+
 #### 21. clip_by_value 
 '''
 A = tf.random_normal(shape = [3,4])
@@ -850,18 +1032,50 @@ with tf.Session() as sess:
 #### 30 tf.scatter_update scatter_nd ------indexing & update 
 ###  tf.gather tf.gather_nd
 ###  a is tf.Tensor    a[1] = blabla
+
+#######  scatter_update
+'''
 a = tf.Variable(tf.random_normal([5,4]))
 b = tf.scatter_update(a, [0, 1], [[1, 1, 0, 0], [1, 0, 4, 0]])
 
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
-	print(sess.run([b]))
+	c = sess.run(b)
+	print(type(c))
+
+	#print(sess.run([b]))
+'''
+
+###### scatter_nd   TO DO 
 
 
+###### scatter_add 
 
 
+#### 31 tf.exp / div / sqrt / rsqrt (1 / sqrt(x))
+'''
+a = tf.random_uniform(shape = [3,4], minval = 0, maxval = 1, dtype = tf.float32)
+b = tf.random_uniform(shape = [3,1], minval = 0, maxval = 1, dtype = tf.float32)
+sqrt_a = tf.rsqrt(a)
+div_ab = tf.div(a,b)
+
+with tf.Session() as sess:
+	print(sess.run([a, b, sqrt_a, div_ab]))
+'''
 
 
+##### 32 tf.compat.as_str / as_bytes / as_text ??? how to use, encode
+'''
+lines = ['abc c fewj \n', 'bbc feo fe \n', 'aaai']
+
+line = tf.compat.as_bytes(lines[0])
+line2 = tf.compat.as_str(lines[1])
+line3 = tf.compat.as_text(lines[1])
+print(line)
+print(line2)
+print(line3)
+#### don't have sess.run
+'''
 
 
 
