@@ -10,21 +10,18 @@ tf.set_random_seed(5)
 
 tf.reverse
 tf.scan
-tf.range
 tf.map_fn
-tf.convert_to_tensor
-tf.rank 
-tf.split
-tf.stop_gradient
-tf.convert_to_tensor
-tf.size
-tf.identity
-tf.cond
-tf.convert_to_tensor
-tf.equal
+tf.convert_to_tensor ***
+tf.stop_gradient: tf.gradient 
+
+tf.identity:   Return a tensor with the same shape and contents as input.
+tf.range: range, np.arange()   tf.range(start, limit, delta)
+tf.cond: if ... else ...
+
+tf.equal 
 tf.cast
-tf.tensordot
-tf.while_loop
+tf.tensordot 
+tf.while_loop 
 
 ==================================== NLP term ====================================
 tf.one_hot  
@@ -48,8 +45,7 @@ tf.local_variables_initializer
 tf.tables_initializer
 
 
-tf.shape  get_shape
-tf.TensorShape			*******
+tf.TensorShape	******* see 20.TensorShape:   tf.shape  get_shape
 
 
 tf.contrib.layers.fully_connected
@@ -115,7 +111,8 @@ Modules
 30 tf.scatter_update scatter_nd ------indexing & update 
 31 tf.exp / div / sqrt / rsqrt (1 / sqrt(x))
 32 tf.compat.as_str / as_bytes / as_text
-
+33 tf.rank:  Equivalent to np.ndim
+34 tf.split:  
 ### list of list; numpy.array can be used as input for TF 
 
 
@@ -560,6 +557,15 @@ with tf.Session() as sess:
 	print(sess.run([list_shape, np_shape]))
 	print(sess.run(t1_shape))
 	print(sess.run([list_size, np_size]))
+'''
+
+#### 补充 from 12.1 tf.size: input can be list, np.array, tensor 
+'''
+a = [[1,2], [3,4]]
+a = np.random.random((2,3))
+size_a = tf.size(a)
+with tf.Session() as sess:
+	print(sess.run(size_a))
 '''
 ############################################################################################################
 
@@ -1064,7 +1070,11 @@ with tf.Session() as sess:
 '''
 
 
-##### 32 tf.compat.as_str / as_bytes / as_text ??? how to use, encode
+##### 32 tf.compat.as_str / as_bytes / as_text 
+####??? how to use, encode
+####  Functions for Python 2 vs. 3 compatibility.
+
+
 '''
 lines = ['abc c fewj \n', 'bbc feo fe \n', 'aaai']
 
@@ -1078,8 +1088,43 @@ print(line3)
 '''
 
 
+#### 33 tf.rank:  Equivalent to np.ndim
+'''
+a = tf.random_normal(shape = [1,2,3,4,5])
+rank_a = tf.rank(a)
+with tf.Session() as sess:
+	print(sess.run(rank_a))
+
+b = np.random.random((1,2,3))
+print(b.ndim)
+'''
 
 
+
+#### 34 tf.split
+## example 1.
+'''
+a = tf.random_uniform(shape = [2,8], minval = 0, maxval = 1, dtype = tf.float32)
+b = tf.split(value = a, num_or_size_splits = 4, axis = 1)
+#### 8 被 4 整除 
+with tf.Session() as sess:
+	print(sess.run([a,b]))
+'''
+
+
+## example 2.
+# axis为1，所以value.shape[1]为30，4+15+11正好为30
+'''
+value = tf.random_normal([2,30])
+split0, split1, split2 = tf.split(value = value, num_or_size_splits = [4, 15, 11], axis = 1)
+
+a = tf.shape(split0)  # [5, 4]
+b = tf.shape(split1)  # [5, 15]
+c = tf.shape(split2)  # [5, 11]
+
+with tf.Session() as sess:
+	print(sess.run([value, a,b,c]))
+'''
 
 
 
