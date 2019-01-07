@@ -12,7 +12,7 @@ tf.reverse
 tf.scan
 tf.map_fn
 tf.convert_to_tensor ***
-tf.stop_gradient: tf.gradient 
+tf.stop_gradient & tf.gradient 
 
 tf.identity:   Return a tensor with the same shape and contents as input.
 tf.range: range, np.arange()   tf.range(start, limit, delta)
@@ -113,6 +113,7 @@ Modules
 32 tf.compat.as_str / as_bytes / as_text
 33 tf.rank:  Equivalent to np.ndim
 34 tf.split:  
+35 tf.tensordot
 ### list of list; numpy.array can be used as input for TF 
 
 
@@ -1125,6 +1126,34 @@ c = tf.shape(split2)  # [5, 11]
 with tf.Session() as sess:
 	print(sess.run([value, a,b,c]))
 '''
+
+#### 35 tf.tensordot: similar to np.tensordot , details see np_common.py 
+'''
+a = tf.ones([5,4,2,3])
+b = tf.ones([2,3,6])
+shape1 = tf.tensordot(a, b, axes = 2).get_shape().as_list()
+assert shape1 == [5, 4, 6]
+'''
+
+'''
+a = tf.ones([5,4,2,3])
+b = tf.ones([3,2,6])
+shape1 = tf.tensordot(a,b, axes = (2,1)).get_shape().as_list()
+assert shape1 == [5,4,3,3,6]
+
+shape2 = tf.tensordot(a, b, axes = (3, 0)).get_shape().as_list()
+assert shape2 == [5, 4, 2, 2, 6]
+
+shape3 = tf.tensordot(a,b, axes = ((2, 3), (1, 0))).get_shape().as_list()
+assert shape3 == [5, 4, 6]
+
+shape4 = tf.tensordot(a,b, axes = ((-2, -1), (1, 0)) ).get_shape().as_list()
+assert shape4 == [5,4,6]
+'''
+
+
+
+
 
 
 
