@@ -114,6 +114,7 @@ Modules
 33 tf.rank:  Equivalent to np.ndim
 34 tf.split:  
 35 tf.tensordot
+36 tf.nn.softmax 
 ### list of list; numpy.array can be used as input for TF 
 
 
@@ -1150,6 +1151,46 @@ assert shape3 == [5, 4, 6]
 shape4 = tf.tensordot(a,b, axes = ((-2, -1), (1, 0)) ).get_shape().as_list()
 assert shape4 == [5,4,6]
 '''
+
+
+
+
+### 36 tf.nn.softmax   默认 B,D i.e., axis = -1, 最后一个维度  
+'''
+a = tf.random_normal([2,3])
+b = tf.nn.softmax(a)
+
+with tf.Session() as sess:
+	print(sess.run([a,b]))
+'''
+'''
+a = tf.random_normal([2,2,2])
+b = tf.nn.softmax(a)
+c = tf.reduce_sum(b, axis = -1)
+with tf.Session() as sess:
+	print(sess.run([a,b,c]))
+'''
+
+
+
+### example: attention mechanism
+"""
+attention_weight (alpha): B, T
+input: B, T, D
+output: B, D
+"""
+'''
+B, T, D = 2, 3, 2
+X_in = tf.ones(shape = [B, T, D])
+alpha = tf.random_uniform(shape = [B, T], minval = 0, maxval = 1)
+alpha_expand = tf.expand_dims(alpha, -1)  ### B, T, 1
+X_o = tf.multiply(X_in, alpha_expand)
+
+with tf.Session() as sess:
+	print(sess.run([X_in, alpha, X_o]))
+
+'''
+
 
 
 
