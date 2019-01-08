@@ -66,10 +66,10 @@ Modules
 
 	tf.layers   93
 	tf.nn 		57
-	tf.estimator 99
-	tf.train 	23
 	tf.contrib   19 
 	tf.contrib.seq2seq 17 
+	tf.estimator 99
+	tf.train 	23	
 	tf.app
 	tf.gfile
 	tf.test.TestCase*** 
@@ -115,6 +115,7 @@ Modules
 34 tf.split:  
 35 tf.tensordot
 36 tf.nn.softmax 
+37 eval
 ### list of list; numpy.array can be used as input for TF 
 
 
@@ -1191,6 +1192,14 @@ with tf.Session() as sess:
 
 '''
 
+### 37 eval()   get value from tf
+
+a = tf.Variable(tf.random_normal([3,4]))
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	b = a.eval()
+	print(b)
 
 
 
