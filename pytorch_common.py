@@ -5,6 +5,8 @@ import numpy as np
 1. torch.ones / zeros 
 2. torch.rand / randn /
 3. isnan isinf
+4. unsqueeze & squeeze & view 
+
 
 variable  
 	requires_grad is boolean 
@@ -48,6 +50,31 @@ print(torch.isinf(c))
 assert torch.isinf(c).any()
 assert torch.isinf(c).all()
 '''
+
+### 4. unsqueeze & squeeze & view 
+
+### 4.1 view
+'''
+a = torch.Tensor(2,3)
+b = a.view(1,-1)
+print(a)
+print(b)
+'''
+
+### 4.2 squeeze & unsqueeze
+'''
+b=torch.Tensor(1,3)
+c = b.squeeze(0)
+d = c.unsqueeze(1)
+assert b.shape == (1,3)
+assert c.shape == (3,)
+assert d.shape == (3,1)
+'''
+
+
+
+
+
 
 
 
