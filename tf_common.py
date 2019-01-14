@@ -116,6 +116,8 @@ Modules
 35 tf.tensordot
 36 tf.nn.softmax 
 37 eval
+38  embedding + embedding_lookup
+39 LSTM: bidirectional + multilayer 
 ### list of list; numpy.array can be used as input for TF 
 
 
@@ -232,7 +234,7 @@ advanced topic
 	3. 从trainOP上入手
 	######### trainOp   variable_scope("discriminator")
 	theta_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                     "discriminator")
+									 "discriminator")
 	D_solver = tf.train.AdamOptimizer(learning_rate = self.learning_rate).minimize(D_loss, var_list=theta_D)
 
 
@@ -265,10 +267,10 @@ z=tf.multiply(x,y)
 z3=tf.matmul(x,y)
 
 with tf.Session() as sess:  
-    print(sess.run([x,z]))
-    print(sess.run(z1))
-    print(sess.run(z2))
-    print(sess.run(z3))
+	print(sess.run([x,z]))
+	print(sess.run(z1))
+	print(sess.run(z2))
+	print(sess.run(z3))
 '''
 
 ############################################################################################################
@@ -397,7 +399,7 @@ with tf.Session() as sess:
 indices = [[[0, 0, 1], [1, 0, 1]], [[0, 1, 1], [1, 1, 0]]]
 indices_shape = tf.shape(indices)
 params = [[['a0', 'b0'], ['c0', 'd0']],
-          [['a1', 'b1'], ['c1', 'd1']]]
+		  [['a1', 'b1'], ['c1', 'd1']]]
 params_shape = tf.shape(params)
 output = tf.gather_nd(params, indices)
 with tf.Session() as sess:
@@ -411,8 +413,8 @@ with tf.Session() as sess:
 indices = [[[0], [1]]]  ### 1,2, (1) (1)->2,4   => final shape is 1,2,2,4  
 indices_shape = tf.shape(indices)
 params = [[['a0', 'b0', ' ',  ' '], ['c0', 'd0', ' ',  ' ']],
-          [['a1', 'b1', ' ',  ' '], ['c1', 'd1', ' ',  ' ']],
-          [['a1', 'b1', ' ',  ' '], ['c1', 'd1', ' ',  ' ']]]  ### 3,2,4
+		  [['a1', 'b1', ' ',  ' '], ['c1', 'd1', ' ',  ' ']],
+		  [['a1', 'b1', ' ',  ' '], ['c1', 'd1', ' ',  ' ']]]  ### 3,2,4
 params_shape = tf.shape(params)
 output = tf.gather_nd(params, indices)
 output_shape = tf.shape(output)
@@ -644,7 +646,7 @@ with tf.Session() as sess:
 x = [[1,2,3],[4,5,6]]
 y = [[7,8,9],[10,11,12]]
 condition3 = [[True,False,False],
-             [False,True,True]]
+			 [False,True,True]]
 with tf.Session() as sess:
 	print(sess.run(tf.where(condition3,x,y)))
 '''
@@ -747,8 +749,8 @@ with tf.Session() as sess:
 '''
 """
 [array([[-1.5072867 , -0.8529847 ],
-       [-0.78440124, -0.26547712]], dtype=float32), array([[1, 0],
-       [0, 1]], dtype=int32), array([1.0728838 , 0.46697435], dtype=float32)]
+	   [-0.78440124, -0.26547712]], dtype=float32), array([[1, 0],
+	   [0, 1]], dtype=int32), array([1.0728838 , 0.46697435], dtype=float32)]
 
 exp(-1.5072867) / (exp(-1.5072867) + exp(-0.8529847))   =>  0.34202074733030896
 - log(0.34202074733030896) => 1.072883879051055
@@ -1040,7 +1042,7 @@ with tf.Session() as sess:
 
 #### 30 tf.scatter_update scatter_nd ------indexing & update 
 ###  tf.gather tf.gather_nd
-###  a is tf.Tensor    a[1] = blabla
+###  a is tf.Tensor	a[1] = blabla
 
 #######  scatter_update
 '''
@@ -1193,14 +1195,80 @@ with tf.Session() as sess:
 '''
 
 ### 37 eval()   get value from tf
-
+'''
 a = tf.Variable(tf.random_normal([3,4]))
 
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	b = a.eval()
 	print(b)
+'''
 
+
+###  38  embedding + embedding_lookup & LSTM: bidirectional + multilayer
+##  https://github.com/dongjun-Lee/birnn-language-model-tf/blob/master/model/bi_rnn_lm.py
+##  https://stackoverflow.com/questions/46011973/attributeerror-lstmstatetuple-object-has-no-attribute-get-shape-while-build
+from tensorflow.contrib import rnn
+word_num = 10
+embed_dim = 5
+rnn_hidden_size = 36
+keep_prob = 0.8
+rnn_num_layer = 2
+X = [[1,2,3,1], [1,2,1,0], [0,0,2,1]]  ### 3, 4	
+src_in = tf.placeholder(shape = [None, 4], dtype = tf.int32)
+
+### embedding 
+with tf.variable_scope('embedding'):
+	embedding_mat = tf.get_variable(
+							'lookup',
+							shape = [word_num, embed_dim],
+							initializer=tf.random_uniform_initializer(minval = -1, maxval = 1), 
+							trainable = True
+						)
+### embedding lookup
+src_embed = tf.nn.embedding_lookup(embedding_mat, src_in)
+
+### bi-lstm multiple layer
+with tf.variable_scope('bi-rnn'):
+	def make_cell():
+		cell = rnn.BasicLSTMCell(rnn_hidden_size)
+		cell = rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
+		return cell 
+
+	fw_cell = rnn.MultiRNNCell([make_cell() for _ in range(rnn_num_layer)])
+	bw_cell = rnn.MultiRNNCell([make_cell() for _ in range(rnn_num_layer)])
+	((encoder_fw_outputs, encoder_bw_outputs),
+	 (encoder_fw_state, encoder_bw_state)) = tf.nn.bidirectional_dynamic_rnn(
+		fw_cell, bw_cell, src_embed, dtype = tf.float32)
+
+
+	encoder_outputs = tf.concat((encoder_fw_outputs, encoder_bw_outputs), axis = 2)
+	encoder_states = []
+
+	for i in range(rnn_num_layer):
+		if isinstance(encoder_fw_state[i],tf.contrib.rnn.LSTMStateTuple):
+			print('ok')
+			encoder_state_c = tf.concat(values=(encoder_fw_state[i].c,encoder_bw_state[i].c),axis=1,name="encoder_fw_state_c")
+			encoder_state_h = tf.concat(values=(encoder_fw_state[i].h,encoder_bw_state[i].h),axis=1,name="encoder_fw_state_h")
+			encoder_state = tf.contrib.rnn.LSTMStateTuple(c=encoder_state_c, h=encoder_state_h)
+		elif isinstance(encoder_fw_state[i], tf.Tensor):
+			encoder_state = tf.concat(values=(encoder_fw_state[i], encoder_bw_state[i]), axis=1, name='bidirectional_concat')
+
+		encoder_states.append(encoder_state)
+
+
+
+
+
+
+
+'''
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	src_embed_arr =  sess.run([src_embed], feed_dict = {src_in: X})	
+	src_embed_arr = src_embed_arr[0]
+	print(src_embed_arr.shape)
+'''
 
 
 
