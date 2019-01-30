@@ -1208,6 +1208,7 @@ with tf.Session() as sess:
 ###  38  embedding + embedding_lookup & LSTM: bidirectional + multilayer
 ##  https://github.com/dongjun-Lee/birnn-language-model-tf/blob/master/model/bi_rnn_lm.py
 ##  https://stackoverflow.com/questions/46011973/attributeerror-lstmstatetuple-object-has-no-attribute-get-shape-while-build
+'''
 from tensorflow.contrib import rnn
 word_num = 10
 embed_dim = 5
@@ -1255,12 +1256,22 @@ with tf.variable_scope('bi-rnn'):
 			encoder_state = tf.concat(values=(encoder_fw_state[i], encoder_bw_state[i]), axis=1, name='bidirectional_concat')
 
 		encoder_states.append(encoder_state)
+'''
 
+#### conv2d 
+"""
+from tensorflow.python.ops import nn_ops
+#### B,T,1,D
+B,T,D = 3,4,2
+encoder_states = tf.Variable(tf.random_normal(shape = [B,T,1,D]))
+W_h = tf.Variable(tf.random_normal(shape = [1,1,D,D]))
+encoder_features = nn_ops.conv2d(encoder_states, W_h, [1, 1, 1, 1], "SAME") # shape (batch_size,attn_length,1,attention_vec_size)
 
-
-
-
-
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	_, _, out =  sess.run([encoder_states, W_h, encoder_features])
+	print(out.shape)
+"""
 
 '''
 with tf.Session() as sess:
@@ -1272,8 +1283,28 @@ with tf.Session() as sess:
 
 
 
+### mask
+def mask_normalize_attention(padding_mask, attention_weight):
+	"""
+		padding_mask: B,T
+		attention_weight: B,T
+	"""
+	padding_mask = tf.cast(padding_mask, dtype = tf.float32)
+	attention_weight *= padding_mask
+	attention_weight_sum = tf.reduce_sum(attention_weight, 1)
+	return attention_weight / tf.reshape(attention_weight_sum, [-1,1])
+
+weight = tf.Variable(tf.random_uniform(shape = [3,4], minval = 0, maxval = 1, dtype = tf.float32))
+padding_mask = tf.placeholder(tf.int32, shape = [3,4])
+
+weight_mask = mask_normalize_attention(padding_mask, weight)
+
+padding = [[1,1,1,0], [1,1,0,0], [1,0,0,0]]
 
 
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run([weight, weight_mask], feed_dict = {padding_mask:padding}))
 
 
 
