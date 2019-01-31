@@ -1156,6 +1156,26 @@ assert shape4 == [5,4,6]
 '''
 
 
+'''
+B,D,T = 2,3,4 
+a = tf.random_normal(shape = [B,D,T])
+b = tf.random_normal(shape = [T])
+c = tf.tensordot(a,b,axes = 1)
+with tf.Session() as sess:
+	na,nb,nc = sess.run([a,b,c])
+	assert nc.shape == (B,D)
+'''
+'''
+### tensordot
+B,D,T = 2,3,4
+a = tf.random_normal(shape = [B,D])
+b = tf.random_normal(shape = [T])
+c = tf.tensordot(tf.expand_dims(a,-1), tf.expand_dims(b,0), axes = 1)
+with tf.Session() as sess:
+	d = sess.run([c])[0]
+	assert d.shape == (B,D,T)
+'''
+
 
 
 ### 36 tf.nn.softmax   默认 B,D i.e., axis = -1, 最后一个维度  
@@ -1282,19 +1302,20 @@ with tf.Session() as sess:
 '''
 
 
-
+'''
 ### mask
 def mask_normalize_attention(padding_mask, attention_weight):
 	"""
 		padding_mask: B,T
 		attention_weight: B,T
 	"""
+	attention_weight = tf.nn.softmax(attention_weight, axis = 1)
 	padding_mask = tf.cast(padding_mask, dtype = tf.float32)
 	attention_weight *= padding_mask
 	attention_weight_sum = tf.reduce_sum(attention_weight, 1)
 	return attention_weight / tf.reshape(attention_weight_sum, [-1,1])
 
-weight = tf.Variable(tf.random_uniform(shape = [3,4], minval = 0, maxval = 1, dtype = tf.float32))
+weight = tf.Variable(tf.random_normal(shape = [3,4],  dtype = tf.float32))
 padding_mask = tf.placeholder(tf.int32, shape = [3,4])
 
 weight_mask = mask_normalize_attention(padding_mask, weight)
@@ -1305,6 +1326,46 @@ padding = [[1,1,1,0], [1,1,0,0], [1,0,0,0]]
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	print(sess.run([weight, weight_mask], feed_dict = {padding_mask:padding}))
+'''
+
+
+### conclusion  B,D,T + B,1,T + 1,1,T is available 
+"""
+B,D,T = 2,3,4
+a = tf.random_normal(shape = [B,D])
+b = tf.random_normal(shape = [B])
+b_exp = tf.expand_dims(b, 1)
+c = a * b_exp
+with tf.Session() as sess:
+	print(sess.run([a,b,c]))
+"""
+
+
+#### scatter_nd    pointer-generator network:
+B,T,D = 2,5,4 
+vocab_size = 4
+### Input
+attention_weight = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
+encoder_batch = tf.random_uniform(shape = [B,T], minval = 0, maxval	= vocab_size-1, dtype = tf.int32)
+indices = tf.range(0,limit = B)
+indices = tf.expand_dims(indices, axis = 1)
+indices = tf.tile(indices, [1,T])
+indices = tf.stack([indices, encoder_batch], axis = 2)
+shapes = [B,vocab_size]
+output = tf.scatter_nd(indices, attention_weight, shapes)
+### Output 
+
+
+with tf.Session() as sess:
+	print(sess.run([encoder_batch, attention_weight, output]))
+
+
+
+
+
+
+
+
 
 
 
