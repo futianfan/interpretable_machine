@@ -1342,6 +1342,7 @@ with tf.Session() as sess:
 
 
 #### scatter_nd    pointer-generator network:
+'''
 B,T,D = 2,5,4 
 vocab_size = 4
 ### Input
@@ -1359,7 +1360,103 @@ output = tf.scatter_nd(indices, attention_weight, shapes)
 with tf.Session() as sess:
 	print(sess.run([encoder_batch, attention_weight, output]))
 
+'''
 
+'''
+B,T,D = 2,3,4
+W = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
+b = tf.random_uniform(shape = [B,1], minval = 0, maxval = 1, dtype = tf.float32)
+Wb = W * b
+with tf.Session() as sess:
+	print(sess.run([Wb]))
+'''
+
+'''
+B,T,D = 2,3,4
+W = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
+w = W[:,1]
+w_shape = w.get_shape().as_list()
+print(w_shape)
+'''
+
+
+
+'''
+B,T = 3,4
+W = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
+idx = tf.placeholder(dtype = tf.int32, shape = [B])
+inp = [2,0,1]
+batch_id = tf.range(0,B)
+indices = tf.stack([batch_id, idx], 1)
+value = tf.gather_nd(params = W, indices = indices)
+
+with tf.Session() as sess:
+	print(sess.run([W, value], feed_dict = {idx:inp}))
+'''
+
+'''
+B, T = 3, 4
+W = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
+Wsum = tf.reduce_sum(W, 1)
+Wsum = tf.expand_dims(Wsum, 1)
+W_norm = W / Wsum
+
+with tf.Session() as sess:
+	print(sess.run([W, W_norm]))
+
+'''
+
+'''
+dim = 10
+a = tf.placeholder(dtype = tf.int32, shape = [None, dim])
+batch_size = tf.shape(a)[0]
+batch_size = a.get_shape()[0]  ### wrong
+#b = tf.random_normal(shape = [batch_size, dim])
+#b = tf.zeros_like(a)
+'''
+
+
+batch_size = 32
+
+class Model(object):
+
+	def __init__(self):
+		tf.reset_default_graph()		
+		self.enc_batch = tf.placeholder(tf.int32, shape = [batch_size, None])
+		self.oov_num = tf.placeholder(tf.int32, shape = [])
+		self.results = tf.reduce_sum(self.enc_batch,1) * self.oov_num
+		self.int2 = batch_size + self.oov_num
+		self.mat2 = tf.Variable(tf.zeros(shape = [batch_size, 10]))
+		self.mat = tf.zeros(shape = [batch_size, self.oov_num])
+		self.mat3 = tf.concat([self.mat2, self.mat], 1)
+		print(type(self.mat2))
+		print(type(self.mat))
+		print(type(self.mat3))
+		#self.mat = tf.Variable(tf.zeros(shape = [batch_size, self.oov_num]), validate_shape=False)
+		self._open_session()
+
+	def _open_session(self):
+		#tf.reset_default_graph()
+		self.sess = tf.Session()
+		self.sess.run(tf.global_variables_initializer())
+
+	def _make_feed_dict(self, batch, int1):
+
+		feed_dict = {}
+		feed_dict[self.enc_batch] = batch
+		feed_dict[self.oov_num] = int1
+		return feed_dict
+
+	def run(self, batch, int1):
+		feed_dict = self._make_feed_dict(batch, int1)
+		return self.sess.run([self.mat, self.int2], feed_dict)
+
+
+batch = np.random.random((batch_size, 5))
+int1 = 7
+
+model = Model()
+model.run(batch, int1)
 
 
 
