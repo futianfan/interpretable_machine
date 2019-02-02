@@ -1381,7 +1381,7 @@ print(w_shape)
 
 
 
-'''
+
 B,T = 3,4
 W = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
 idx = tf.placeholder(dtype = tf.int32, shape = [B])
@@ -1392,7 +1392,7 @@ value = tf.gather_nd(params = W, indices = indices)
 
 with tf.Session() as sess:
 	print(sess.run([W, value], feed_dict = {idx:inp}))
-'''
+
 
 '''
 B, T = 3, 4
@@ -1415,7 +1415,7 @@ batch_size = a.get_shape()[0]  ### wrong
 #b = tf.zeros_like(a)
 '''
 
-
+'''
 batch_size = 32
 
 class Model(object):
@@ -1457,6 +1457,17 @@ int1 = 7
 
 model = Model()
 model.run(batch, int1)
+'''
+
+'''
+B,D = 2,4 
+a = tf.random_normal([B,D])
+b = tf.maximum(a, 0.5)
+
+with tf.Session() as sess:
+	print(sess.run([b]))
+'''
+
 
 
 
