@@ -1477,7 +1477,7 @@ with tf.Session() as sess:
 '''
 
 
-
+'''
 A = tf.placeholder(tf.float32, shape = [3,4])
 
 B = tf.placeholder(tf.float32, shape = [4,2])
@@ -1494,6 +1494,19 @@ feed_dict2 = {C: np.random.random((3,2))}
 with tf.Session() as sess:
 	print(sess.run([E], feed_dict2))
 	#print(sess.run([E], feed_dict1))
+'''
+
+'''
+A = tf.random_normal([3,2])
+B = tf.reduce_sum(A, [1])
+
+with tf.Session() as sess:
+	print(sess.run([A,B]))
+'''
+
+
+
+
 
 
 
