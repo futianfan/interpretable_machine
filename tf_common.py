@@ -1381,7 +1381,7 @@ print(w_shape)
 
 
 
-
+'''
 B,T = 3,4
 W = tf.random_uniform(shape = [B,T], minval = 0, maxval = 1, dtype = tf.float32)
 idx = tf.placeholder(dtype = tf.int32, shape = [B])
@@ -1392,7 +1392,7 @@ value = tf.gather_nd(params = W, indices = indices)
 
 with tf.Session() as sess:
 	print(sess.run([W, value], feed_dict = {idx:inp}))
-
+'''
 
 '''
 B, T = 3, 4
@@ -1468,9 +1468,32 @@ with tf.Session() as sess:
 	print(sess.run([b]))
 '''
 
+'''
+A = tf.random_normal([3, 4])
+value, indx = tf.nn.top_k(A, 2)
+
+with tf.Session() as sess:
+	print(sess.run([A, value, indx]))
+'''
 
 
 
+A = tf.placeholder(tf.float32, shape = [3,4])
+
+B = tf.placeholder(tf.float32, shape = [4,2])
+
+C = tf.matmul(A, B)
+
+D = tf.random_normal([3,2])
+
+E = C + D
+
+feed_dict1 = {A: np.random.random((3,4)), B: np.random.random((4,2))}
+feed_dict2 = {C: np.random.random((3,2))}
+
+with tf.Session() as sess:
+	print(sess.run([E], feed_dict2))
+	#print(sess.run([E], feed_dict1))
 
 
 
