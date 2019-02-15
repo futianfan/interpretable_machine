@@ -1,5 +1,5 @@
 from time import time
-
+import logging 
 ## https://www.zhihu.com/question/26930016
 
 ############	1. simple decorator  #########
@@ -142,7 +142,43 @@ class Application:
 
 
 
+###### 不带参数。装饰器。
+def use_logging(func):
+	def wrapper(*args, **kwargs):
+		logging.warn("%s is running" % func.__name__)
+		return func(*args)
+	return wrapper
 
+@use_logging
+def foo():
+	print("i am foo")
+
+
+
+
+
+
+###### 带参数。装饰器。
+
+def use_logging(level):
+	def decorator(func):
+		def wrapper(*args, **kwargs):
+			if level == 'warning':
+				logging.warn('%s is running' % func.__name__)
+			return func(*args)
+		return wrapper
+	return decorator
+
+#@use_logging(level = 'warning')
+def foo(name = 'fool'):
+	print('i am %s' % name)
+
+
+foo = use_logging(level = 'warning')(foo)   ##### 等价修饰器 ！！好理解   括号从左到右， 函数调用从外到内 
+##use_logging(level = 'warning')(foo)()  ### 或者 直接调用 
+
+
+#### 带 . 运算的装饰器  
 
 
 if __name__ == '__main__':
@@ -150,12 +186,15 @@ if __name__ == '__main__':
 	#f2()
 	#assert f3(batchsize = 16, batch_first = True) == 16
 	#print('======================test f4======================')
-	assert f4(3,2) == 5
+	#assert f4(3,2) == 5
 	#print('======================test f5======================')
 	#print(f5(2,5))
 	app = Application(1)
 	assert hasattr(app, 'attr3')
 
 	pass
+	foo()
+	
+
 
 
