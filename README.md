@@ -94,4 +94,16 @@ import os:  os.path.join; os.path.abspath; os.path.exists(some_path); os.system(
 
 
 
+yield 
+
+try: except: else: finally
+
+with contextlib  __enter__ __exit__
+
+
+
+
+
+
+
 
