@@ -9,6 +9,9 @@ from torch.autograd import Variable
 2. torch.rand / randn /
 3. isnan isinf
 4. unsqueeze & squeeze & view    squeeze 降维。 unsqueeze 升维
+5. Attention: luong general
+
+
 5. contiguous()    contiguous().view() == reshape  
 6. embedding 
 7. nn.init 
@@ -78,13 +81,14 @@ assert d.shape == (3,1)
 
 
 
-####  5  luong general
-
+####  5  Attention: luong general
 batch_size = 11
 encoder_hidden_size = 9
 encoder_len = 13
 decoder_hidden_size = 7
 
+
+'''
 attn_W = nn.Linear(
 			decoder_hidden_size,
 			encoder_hidden_size,
@@ -94,7 +98,7 @@ encoder_output = Variable(torch.rand(batch_size, encoder_len, encoder_hidden_siz
 decoder_state = Variable(torch.rand(batch_size, decoder_hidden_size))				#### B, d2
 ### output is  B, T
 
-### attention
+### attention: luong general
 Wh = attn_W(decoder_state)   #### B,d1
 assert Wh.shape == (batch_size, encoder_hidden_size)
 Wh = Wh.unsqueeze(1)
@@ -104,8 +108,25 @@ eWh = Wh_ext * encoder_output   #### B,T,d1
 assert eWh.shape == (batch_size, encoder_len, encoder_hidden_size)
 eWh = eWh.sum(2)
 assert eWh.shape == (batch_size, encoder_len)
+'''
 
+### nn.linear can be used for 3-rank tensor   a,b,c & c,d => a,b,d
+'''
+attn_W2 = nn.Linear(encoder_hidden_size, decoder_hidden_size)
+out = attn_W2(encoder_output)
+print(out.shape)
+'''
 
+rnn = nn.LSTMCell(10, 20)  ### d,h
+input_ = torch.randn(6, 3, 10)  ### T,B,d 
+hx = torch.randn(3, 20)  ### B,h
+cx = torch.randn(3, 20)  ### B,h
+output = []
+for i in range(6):
+	hx, cx = rnn(input_[i], (hx, cx))
+	assert hx.shape == (3,20)
+	assert cx.shape == (3,20)
+	output.append(hx)
 
 
 
