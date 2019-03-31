@@ -2,9 +2,11 @@ import tensorflow as tf
 import numpy as np 
 import os 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 tf.set_random_seed(3)
 np.random.seed(1)
-tf.set_random_seed(5)
+
+
 
 """ 
 
@@ -715,7 +717,7 @@ with tf.Session() as sess:
 '''
 
 ### 23. tf.norm  matrix norm, normalized by rows/columns
-"""
+
 a = tf.random_normal(shape = [2,2], dtype = tf.float32)
 b = tf.norm(tensor = a)	## F-norm 
 a_l1 = tf.norm(tensor = a, ord = 1)
@@ -723,7 +725,7 @@ a_normalized = tf.nn.l2_normalize(a, axis = 1)
 ### after normalize, each row vector has unit length.  
 with tf.Session() as sess:
 	print(sess.run([a,b, a_l1, a_normalized]))
-"""
+
 
 
 ### 24. tf.nn.sigmoid_cross_entropy_with_logits 
@@ -759,7 +761,7 @@ exp(-1.5072867) / (exp(-1.5072867) + exp(-0.8529847))   =>  0.34202074733030896
 
 ###  26. embedding_lookup
 '''
-embed_mat = np.random.random([5,2])
+embed_mat = np.random.random([5,4])
 seq_idx = tf.placeholder(dtype = tf.int32, shape = [None, 3])
 lst = [[1,2,3], [0,1,4]]
 #lst = [[1,2,3], [0,1,4]]
@@ -770,12 +772,94 @@ with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 	embedded_seq0 = sess.run((embedded_seq), 
 								feed_dict = {seq_idx: lst})
-print(embed_mat)
+print('embedding matrix ', embed_mat)
 print(embedded_seq0)
 print(type(embedded_seq0))
 #assert embedded_seq0.get_shape().as_list() == [2, 3, 2]
-assert embedded_seq0.shape == (2,3,2)
+assert embedded_seq0.shape == (2,3,4)
+''' 
+
 '''
+embed_mat = np.random.random([5,4])
+#logits = tf.placeholder(dtype = tf.float32, shape = [None, 3, 5])
+#logits_np = np.random.random([6,3,5])
+#logits = [-2, 2, 0]
+#logits = [0.1, 0.5, 0.4]
+logits = tf.placeholder(dtype = tf.float32, shape = [3])
+temperature = 0.5
+dist = tf.contrib.distributions.RelaxedOneHotCategorical(temperature, logits = logits) ### 6,3,5 
+'''
+
+
+'''
+logits = tf.placeholder(dtype = tf.float32, shape = [None, 3])
+logits_np = np.random.random([2, 3])
+temparature = 1
+from tensorflow.contrib.distributions import RelaxedOneHotCategorical
+sample_id = RelaxedOneHotCategorical(temparature, logits = logits).sample()
+
+idx = tf.argmax(sample_id, 1)
+print(idx.dtype)
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	samples = sess.run((sample_id),  feed_dict = {logits: logits_np})
+	idx = sess.run((idx),  feed_dict = {logits: logits_np})
+print('logits is ', logits_np)
+print('samples is ', samples)
+print('index is ', idx)
+print(np.sum(samples, -1))
+'''
+
+'''
+logits = tf.placeholder(dtype = tf.float32, shape = [None, 5])
+logits_lst = [logits, logits]
+def f(logits):
+	return tf.argmax(logits, 1)
+
+logits_lst2 = list(map(f, logits_lst))
+print(logits_lst2[0].get_shape())
+a = tf.stack(logits_lst2, 0)
+print(a.get_shape())
+'''
+
+'''
+a = {1:2, 2:3, 3:0, 0:1}
+b = [0 for i in range(len(a))]
+for k,v in a.items():
+	b[k] = v
+assert b == [1,2,3,0]
+
+idx = tf.placeholder(dtype = tf.int64, shape = [None])
+#na = [[2,1], [0,1], [2,3]]
+na = [1,3,0]
+feed_dict = {idx:na}
+c = tf.gather(b, idx)
+
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	print(sess.run((c),  feed_dict= feed_dict))
+'''
+
+
+#print(dist.get_shape())
+#embedded = tf.nn.embedding_lookup(params = embed_mat, ids = dist)
+
+'''
+with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	embedded0 = sess.run((dist),  feed_dict = {logits: logits_np})
+'''
+
+'''with tf.Session() as sess:
+	sess.run(tf.global_variables_initializer())
+	embedded0 = sess.run((embedded_seq),  feed_dict = {logits: logits_np})
+'''
+
+
+
+
+
 
 """
 ###### Interesting problem
@@ -1505,11 +1589,20 @@ with tf.Session() as sess:
 '''
 
 
+'''
+z = tf.random_normal([2, 3])
+y = tf.random_normal([2, 3])
+assert z.get_shape() == y.get_shape()
+'''
 
 
-
-
-
+'''
+idx1 = tf.placeholder(dtype = tf.int64, shape = [None, 6])
+idx2 = tf.placeholder(dtype = tf.int64, shape = [None, 6])
+idx3 = idx1 + 1
+assert idx1.get_shape() == idx2.get_shape()
+assert idx1.get_shape() == idx3.get_shape()
+'''
 
 
 
